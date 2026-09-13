@@ -1,0 +1,12 @@
+---
+- name: Restart nginx
+  community.docker.docker_compose_v2:
+    project_src: "{{ nginx_config_path }}"
+    state: restarted
+  register: output
+
+- name: Reload nginx config
+  community.docker.docker_container_exec:
+    container: nginx
+    command: nginx -s reload
+  register: output

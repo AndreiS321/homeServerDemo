@@ -1,0 +1,26 @@
+services:
+  vmagent:
+    image: victoriametrics/vmagent:{{ vmagent_version }}
+    container_name: vmagent
+    ports:
+      - 127.0.0.1:8429:8429
+    volumes:
+      - {{ vmagent_volume_name }}:/vmagentdata
+      - {{ vmagent_config_path }}/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - {{ default_bridge_network_name }}
+    command:
+      - "--promscrape.config=/etc/prometheus/prometheus.yml"
+      - "--remoteWrite.url=http://victoriametrics:8428/api/v1/write"
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+volumes:
+  {{ vmagent_volume_name }}:
+    name: "{{ vmagent_volume_name }}"
+    external: true
+networks:
+  {{ default_bridge_network_name }}:
+    name: {{ default_bridge_network_name }}
+    external: true

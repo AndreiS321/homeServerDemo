@@ -1,0 +1,25 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ cadvisor_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ cadvisor_config_path }}/docker-compose.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart cadvisor
+
+- name: Start docker compose service
+  community.docker.docker_compose_v2:
+    project_src: "{{ cadvisor_config_path }}"
+    state: present

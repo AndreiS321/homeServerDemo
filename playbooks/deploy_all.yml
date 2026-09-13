@@ -1,0 +1,60 @@
+---
+- name: Create an ansible user
+  hosts: all
+  remote_user: root
+  roles:
+    - role: create_ansible_user
+  tags: user
+
+- name: Configure network
+  hosts: all
+  remote_user: ansible
+  roles:
+    - network
+  tags: network
+
+- name: Install docker
+  hosts: all
+  remote_user: ansible
+  roles:
+    - role: install_docker
+  tags: docker
+
+- name: Get ssl certs from certbot
+  hosts: all
+  remote_user: ansible
+  roles:
+    - certbot
+  tags: certbot
+
+- name: Deploy nginx
+  hosts: all
+  remote_user: ansible
+  roles:
+    - nginx
+  tags: nginx
+
+- name: Configure metrics and observability
+  ansible.builtin.import_playbook: metrics.yml
+  tags: metrics
+
+- name: Install github_runner
+  hosts: all
+  remote_user: ansible
+  roles:
+    - role: github_runner
+  tags: github_runner
+
+- name: Deploy home assistant
+  hosts: all
+  remote_user: ansible
+  roles:
+    - home_assistant
+  tags: home_assistant
+
+- name: Deploy tor
+  hosts: all
+  remote_user: ansible
+  roles:
+    - tor
+  tags: tor

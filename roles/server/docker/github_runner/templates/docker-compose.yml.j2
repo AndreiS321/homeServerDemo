@@ -1,0 +1,20 @@
+services:
+  github_runner:
+    build: .
+    container_name: github_runner
+    restart: always
+    environment:
+      REPO_URL: {{ github_runner_repo }}
+      RUNNER_NAME: {{ github_runner_name }}
+      RUNNER_TOKEN: {{ github_runner_token }}
+      DISABLE_AUTOMATIC_DEREGISTRATION: true
+      CONFIGURED_ACTIONS_RUNNER_FILES_DIR: "/actions-runner/_data"
+      LABELS: linux,arm64,ansible,python
+    volumes:
+      - {{ github_runner_data_path }}:/actions-runner/_data
+    networks:
+      - {{ default_bridge_network_name }}
+networks:
+  {{ default_bridge_network_name }}:
+    name: {{ default_bridge_network_name }}
+    external: true

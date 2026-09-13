@@ -1,0 +1,21 @@
+services:
+  grafana:
+    image: grafana/grafana:{{ grafana_version }}
+    container_name: grafana
+    volumes:
+      - {{ grafana_volume_name }}:/var/lib/grafana
+      - {{ grafana_config_path }}/provisioning:/etc/grafana/provisioning
+    networks:
+      - {{ default_bridge_network_name }}
+    restart: always
+    environment:
+      GF_PLUGINS_PREINSTALL: victoriametrics-metrics-datasource
+    
+volumes:
+  {{ grafana_volume_name }}:
+    name: "{{ grafana_volume_name }}"
+    external: true
+networks:
+  {{ default_bridge_network_name }}:
+    name: {{ default_bridge_network_name }}
+    external: true

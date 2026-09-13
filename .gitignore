@@ -1,0 +1,6 @@
+.vault_pass
+.direnv
+.ansible
+.bin
+.venv
+.vscode

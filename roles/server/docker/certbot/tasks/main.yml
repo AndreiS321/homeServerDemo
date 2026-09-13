@@ -1,0 +1,73 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ certbot_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create certs directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ certbot_config_path }}/certs"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create logs directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ certbot_config_path }}/logs"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Check if certs already exist
+      ansible.builtin.stat:
+        path: "{{ certbot_certs_path }}/fullchain.pem"
+      register: certs
+
+    - name: Generate certs
+      community.docker.docker_container:
+        name: certbot_init
+        image: infinityofspace/certbot_dns_duckdns:latest
+        state: started
+        auto_remove: true
+        volumes:
+          - "{{ certbot_config_path }}/certs:/etc/letsencrypt"
+          - "{{ certbot_config_path }}/logs:/var/log/letsencrypt"
+        command: >
+          certonly
+          --authenticator dns-duckdns
+          --dns-duckdns-token {{ duckdns_token }}
+          --dns-duckdns-propagation-seconds 60
+          --preferred-challenges dns
+          --non-interactive
+          --agree-tos
+          --email {{ duckdns_email }}
+          -d "{{ duckdns_domain }}"
+          -d "*.{{ duckdns_domain }}"
+      when: not certs.stat.exists
+
+    - name: Create renew service
+      ansible.builtin.template:
+        src: "certbot-renew.service.j2"
+        dest: "/etc/systemd/system/certbot-renew.service"
+        mode: "0644"
+
+    - name: Create renew service timer
+      ansible.builtin.template:
+        src: "certbot-renew.timer.j2"
+        dest: "/etc/systemd/system/certbot-renew.timer"
+        mode: "0644"
+
+    - name: Enable and start certbot-renew timer
+      ansible.builtin.systemd:
+        name: certbot-renew.timer
+        state: started
+        enabled: true
+        daemon_reload: true

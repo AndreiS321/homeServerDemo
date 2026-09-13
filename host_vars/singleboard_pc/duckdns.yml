@@ -1,0 +1,2 @@
+---
+certbot_certs_path: "{{ certbot_config_path }}/certs/live/{{ duckdns_domain }}"

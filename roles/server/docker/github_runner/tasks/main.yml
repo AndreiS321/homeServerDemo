@@ -1,0 +1,49 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ github_runner_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create data directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ github_runner_data_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ github_runner_config_path }}/docker-compose.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart github-runner
+
+    - name: Copy Dockerfile
+      ansible.builtin.template:
+        src: "Dockerfile.j2"
+        dest: "{{ github_runner_config_path }}/Dockerfile"
+        mode: "0644"
+        owner: root
+        group: root
+      notify:
+        - Rebuild github-runner
+        - Restart github-runner
+
+- name: Copy public key for a cicd user
+  ansible.builtin.lineinfile:
+    path: "/home/ansible/.ssh/authorized_keys"
+    line: "{{ ssh_pub_key_cicd }}"
+
+- name: Start docker compose service
+  community.docker.docker_compose_v2:
+    project_src: "{{ github_runner_config_path }}"
+    state: present

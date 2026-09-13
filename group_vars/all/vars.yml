@@ -1,0 +1,20 @@
+---
+base_path: "/srv"
+
+default_bridge_network_name: "default_bridge"
+
+vmagent_config_path: "{{ base_path }}/vmagent"
+victoriametrics_config_path: "{{ base_path }}/victoriametrics"
+cadvisor_config_path: "{{ base_path }}/cadvisor"
+grafana_config_path: "{{ base_path }}/grafana"
+github_runner_config_path: "{{ base_path }}/github-runner"
+github_runner_data_path: "{{ github_runner_config_path }}/data"
+home_assistant_config_path: "{{ base_path }}/home_assistant"
+tor_config_path: "{{ base_path }}/tor"
+nginx_config_path: "{{ base_path }}/nginx"
+certbot_config_path: "{{ base_path }}/certbot"
+
+vmagent_volume_name: "vmagent_volume"
+victoriametrics_volume_name: "victoriametrics_volume"
+grafana_volume_name: "grafana_volume"
+home_assistant_volume_name: "home_assistant_volume"

@@ -1,0 +1,23 @@
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:{{ victoriametrics_version }}
+    container_name: victoriametrics
+    ports:
+      - 127.0.0.1:8428:8428
+    volumes:
+      - {{ victoriametrics_volume_name }}:/storage
+    networks:
+      - {{ default_bridge_network_name }}
+    command:
+      - "--storageDataPath=/storage"
+      - "--httpListenAddr=:8428"
+    restart: always
+    
+volumes:
+  {{ victoriametrics_volume_name }}:
+    name: "{{ victoriametrics_volume_name }}"
+    external: true
+networks:
+  {{ default_bridge_network_name }}:
+    name: {{ default_bridge_network_name }}
+    external: true

@@ -1,0 +1,47 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ grafana_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ grafana_config_path }}/docker-compose.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart grafana
+
+    - name: Create datasources directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ grafana_config_path }}/provisioning"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy provisioning directory
+      ansible.builtin.copy:
+        src: "provisioning/"
+        dest: "{{ grafana_config_path }}/provisioning"
+        directory_mode: "0755"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart grafana
+
+- name: Create a volume
+  community.docker.docker_volume:
+    name: "{{ grafana_volume_name }}"
+
+- name: Start docker compose service
+  community.docker.docker_compose_v2:
+    project_src: "{{ grafana_config_path }}"
+    state: present

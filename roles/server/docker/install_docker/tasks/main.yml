@@ -1,0 +1,58 @@
+---
+- name: Install python3-debian (for deb822_repository role)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  become: true
+  loop:
+    - python3-debian
+    - python3-requests
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: '{{ ansible_facts["distribution_release"] }}'
+
+- name: Add docker repo
+  ansible.builtin.deb822_repository:
+    name: docker
+    types: deb
+    uris: https://download.docker.com/linux/debian
+    suites: '{{ ansible_facts["distribution_release"] }}'
+    components: stable
+    architectures: "{{ architecture }}"
+    signed_by: https://download.docker.com/linux/debian/gpg
+  become: true
+
+- name: Install docker
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  become: true
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin
+
+- name: Add ansible user to docker group
+  ansible.builtin.user:
+    name: "ansible"
+    groups: docker
+    append: true
+  become: true
+  notify: Restart docker service
+
+- name: Enable and start docker service
+  ansible.builtin.service:
+    name: docker
+    enabled: true
+    state: started
+  become: true
+
+- name: Create docker network (default bridge)
+  community.docker.docker_network:
+    name: "{{ default_bridge_network_name }}"
+    driver: "bridge"

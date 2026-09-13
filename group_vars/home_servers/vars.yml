@@ -1,0 +1,8 @@
+---
+vmagent_version: "v1.147.0"
+victoriametrics_version: "v1.147.0"
+cadvisor_version: "v0.55.1"
+grafana_version: "13.1.1-slim"
+github_runner_version: "2.336.0-debian-trixie"
+home_assistant_version: "2026.8.0"
+nginx_version: "1.31.5-alpine"

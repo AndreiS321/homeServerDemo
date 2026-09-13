@@ -1,0 +1,39 @@
+---
+- name: Deploy node_exporter on hosts
+  hosts: all
+  remote_user: ansible
+  tasks:
+    - name: Node exporter
+      ansible.builtin.include_role:
+        name: prometheus.prometheus.node_exporter
+  vars:
+    node_exporter_web_listen_address: "0.0.0.0:9100"
+  tags: node_exporter
+
+- name: Deploy vmagent
+  hosts: all
+  remote_user: ansible
+  roles:
+    - vmagent
+  tags: vmagent
+
+- name: Deploy victoriametrics
+  hosts: all
+  remote_user: ansible
+  roles:
+    - victoriametrics
+  tags: victoriametrics
+
+- name: Deploy cadvisor
+  hosts: all
+  remote_user: ansible
+  roles:
+    - cadvisor
+  tags: cadvisor
+
+- name: Deploy grafana
+  hosts: all
+  remote_user: ansible
+  roles:
+    - grafana
+  tags: grafana

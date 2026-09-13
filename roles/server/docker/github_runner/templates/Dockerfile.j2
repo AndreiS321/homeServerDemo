@@ -1,0 +1,4 @@
+FROM myoung34/github-runner:{{ github_runner_version }}
+
+RUN curl -L https://nixos.org/nix/install | sh -s -- --daemon --yes
+ENV PATH="/nix/var/nix/profiles/default/bin:/root/.nix-profile/bin/:${PATH}"

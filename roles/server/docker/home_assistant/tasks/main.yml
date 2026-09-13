@@ -1,0 +1,51 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Add ansible user to dialout group for USB access
+      ansible.builtin.user:
+        name: "ansible"
+        groups: dialout
+        append: true
+
+    - name: Create ha directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ home_assistant_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ home_assistant_config_path }}/config"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy configuration file
+      ansible.builtin.copy:
+        src: "configuration.yaml"
+        dest: "{{ home_assistant_config_path }}/config/configuration.yaml"
+        mode: "0655"
+        owner: root
+        group: root
+
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ home_assistant_config_path }}/docker-compose.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart home assistant
+
+- name: Create a volume
+  community.docker.docker_volume:
+    name: "{{ home_assistant_volume_name }}"
+
+- name: Start docker compose service
+  community.docker.docker_compose_v2:
+    project_src: "{{ home_assistant_config_path }}"
+    state: present

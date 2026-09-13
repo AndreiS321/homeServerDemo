@@ -1,0 +1,38 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ vmagent_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy prometheus scrape config
+      ansible.builtin.template:
+        src: "prometheus.yml.j2"
+        dest: "{{ vmagent_config_path }}/prometheus.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart vmagent
+
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ vmagent_config_path }}/docker-compose.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart vmagent
+
+- name: Create a volume
+  community.docker.docker_volume:
+    name: "{{ vmagent_volume_name }}"
+
+- name: Start docker compose service
+  community.docker.docker_compose_v2:
+    project_src: "{{ vmagent_config_path }}"
+    state: present

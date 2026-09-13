@@ -1,0 +1,77 @@
+---
+- name: Preparing configuration
+  become: true
+  block:
+    - name: Create config directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ nginx_config_path }}"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Create logs directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ nginx_config_path }}/logs"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy compose file
+      ansible.builtin.template:
+        src: "docker-compose.yml.j2"
+        dest: "{{ nginx_config_path }}/docker-compose.yml"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Restart nginx
+
+    - name: Copy nginx config file
+      ansible.builtin.template:
+        src: "nginx.conf.j2"
+        dest: "{{ nginx_config_path }}/nginx.conf"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Reload nginx config
+
+    - name: Create conf.d directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ nginx_config_path }}/conf.d"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy nginx conf.d configs
+      ansible.builtin.template:
+        src: "{{ item }}"
+        dest: "{{ nginx_config_path }}/conf.d/{{ item | basename | regex_replace('\\.j2$', '') }}"
+        mode: "0644"
+        owner: root
+        group: root
+      loop: "{{ query('ansible.builtin.fileglob', 'templates/conf.d/*') }}"
+      notify: Reload nginx config
+
+    - name: Create snippets directory
+      ansible.builtin.file:
+        state: directory
+        path: "{{ nginx_config_path }}/snippets"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Copy nginx ssl snippet
+      ansible.builtin.template:
+        src: "snippets/ssl.conf.j2"
+        dest: "{{ nginx_config_path }}/snippets/ssl.conf"
+        mode: "0644"
+        owner: root
+        group: root
+      notify: Reload nginx config
+
+- name: Start docker compose service
+  community.docker.docker_compose_v2:
+    project_src: "{{ nginx_config_path }}"
+    state: present

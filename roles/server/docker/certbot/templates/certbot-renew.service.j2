@@ -1,0 +1,9 @@
+[Unit]
+Description=Renew Let's Encrypt Certificates
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker run --rm -v "{{ certbot_config_path }}/certs:/etc/letsencrypt" -v "{{ certbot_config_path }}/logs:/var/log/letsencrypt" infinityofspace/certbot_dns_duckdns:latest renew --quiet
+ExecStartPost=/usr/bin/docker exec nginx nginx -s reload

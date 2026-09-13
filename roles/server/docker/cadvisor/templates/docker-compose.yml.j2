@@ -1,0 +1,18 @@
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:{{ cadvisor_version }}
+    container_name: cadvisor
+    restart: always
+    ports:
+      - 127.0.0.1:8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - {{ default_bridge_network_name }}
+networks:
+  {{ default_bridge_network_name }}:
+    name: {{ default_bridge_network_name }}
+    external: true

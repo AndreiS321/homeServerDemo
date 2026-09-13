@@ -1,0 +1,6 @@
+---
+- name: Restart cadvisor
+  community.docker.docker_compose_v2:
+    project_src: "{{ cadvisor_config_path }}"
+    state: restarted
+  register: output

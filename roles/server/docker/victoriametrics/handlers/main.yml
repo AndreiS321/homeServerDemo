@@ -1,0 +1,6 @@
+---
+- name: Restart victoriametrics
+  community.docker.docker_compose_v2:
+    project_src: "{{ victoriametrics_config_path }}"
+    state: restarted
+  register: output

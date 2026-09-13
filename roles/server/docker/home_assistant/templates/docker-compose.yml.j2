@@ -1,0 +1,25 @@
+services:
+  home_assistant:
+    image: homeassistant/home-assistant:{{ home_assistant_version }}
+    container_name: home_assistant
+    volumes:
+      - {{ home_assistant_volume_name }}:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    networks:
+      - {{ default_bridge_network_name }}
+    cap_add:
+    - NET_ADMIN
+    - NET_RAW
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+    restart: always
+    
+volumes:
+  {{ home_assistant_volume_name }}:
+    name: "{{ home_assistant_volume_name }}"
+    external: true
+networks:
+  {{ default_bridge_network_name }}:
+    name: {{ default_bridge_network_name }}
+    external: true
